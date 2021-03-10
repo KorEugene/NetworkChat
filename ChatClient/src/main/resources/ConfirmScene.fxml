@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.online.controllers.ConfirmSceneController">
+    <Label text="Are you sure you want to quit?" alignment="CENTER" prefWidth="Infinity" style="-fx-padding: 10"/>
+    <GridPane hgap="10" vgap="10">
+        <padding>
+            <Insets top="10" bottom="10" left="10" right="10"/>
+        </padding>
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Button fx:id="btnYes" prefWidth="Infinity" lineSpacing="10.0" mnemonicParsing="false"
+                onAction="#btnPressedYes"
+                text="Apply" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Button fx:id="btnNo" prefWidth="Infinity" lineSpacing="10.0" mnemonicParsing="false"
+                onAction="#btnPressedNo"
+                text="Cancel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+    </GridPane>
+</VBox>

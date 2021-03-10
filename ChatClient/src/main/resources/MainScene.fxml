@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.online.controllers.MainSceneController">
+    <MenuBar>
+        <Menu text="File" mnemonicParsing="false">
+            <MenuItem onAction="#logout" text="LogOut"/>
+            <MenuItem onAction="#exit" text="Exit"/>
+        </Menu>
+        <Menu text="Edit" mnemonicParsing="false">
+            <MenuItem onAction="#getSettings" text="Settings"/>
+        </Menu>
+        <Menu text="Help" mnemonicParsing="false">
+            <MenuItem onAction="#aboutJavaFX" text="About JavaFX"/>
+        </Menu>
+    </MenuBar>
+    <HBox VBox.vgrow="ALWAYS">
+        <VBox>
+            <Label text="Users" alignment="CENTER" prefWidth="140"
+                   style="-fx-background-color: #39e9ff; -fx-border-color:black; -fx-border-width: 1 1 1 1; -fx-font-size: 14; -fx-font-weight: BOLD; -fx-font-style: italic"/>
+            <ListView fx:id="onlineUsers" prefWidth="140.0" style="-fx-font-style: italic"/>
+        </VBox>
+        <TextArea fx:id="chatArea" wrapText="true" editable="false" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"/>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+    </HBox>
+    <HBox spacing="5.0">
+        <TextArea fx:id="input" wrapText="true" onKeyPressed="#pressEnter" prefHeight="80.0" HBox.hgrow="ALWAYS"
+                  style="-fx-border-color:black; -fx-border-width: 1 1 1 1;"/>
+        <Button fx:id="btnSendMessage" lineSpacing="10.0" mnemonicParsing="false" onAction="#btnSend"
+                prefHeight="80.0" prefWidth="140.0" text="SEND"
+                style="-fx-background-color: #00ff00; -fx-border-color:black; -fx-border-width: 1 1 1 1; -fx-font-size: 20; -fx-font-weight: BOLD"/>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+    </HBox>
+</VBox>
