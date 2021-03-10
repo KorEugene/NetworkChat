@@ -3,8 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ru.online.controllers.LoginSceneController">
+      fx:controller="ru.online.controllers.MainSceneController">
     <GridPane hgap="10" vgap="10">
         <padding>
             <Insets top="10" bottom="10" left="10" right="10"/>
@@ -14,9 +15,9 @@
             <ColumnConstraints percentWidth="70"/>
         </columnConstraints>
         <Label text="Login:" alignment="CENTER" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="labLogin" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <TextField fx:id="loginField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
         <Label text="Password:" alignment="CENTER" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="labPassword" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <TextField fx:id="passField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
     </GridPane>
     <GridPane hgap="10" vgap="10">
         <padding>

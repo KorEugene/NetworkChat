@@ -20,7 +20,7 @@ public class ClientApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         mainStage = primaryStage;
-        LoginWindow.displayLoginWindow(mainStage);
+        MainWindow.displayLoginWindow(mainStage);
     }
 
     public static int getDefaultScreenWidth() {
@@ -29,5 +29,9 @@ public class ClientApp extends Application {
 
     public static int getDefaultScreenHeight() {
         return DEFAULT_SCREEN_HEIGHT;
+    }
+
+    public static Stage getMainStage() {
+        return mainStage;
     }
 }

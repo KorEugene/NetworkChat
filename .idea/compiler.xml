@@ -9,6 +9,7 @@
         <module name="NetworkChat" />
         <module name="ChatClient" />
         <module name="ChatServer" />
+        <module name="ChatClientNetwork" />
         <module name="ChatCommon" />
       </profile>
     </annotationProcessing>
