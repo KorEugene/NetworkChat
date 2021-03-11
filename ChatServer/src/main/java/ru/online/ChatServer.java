@@ -40,6 +40,17 @@ public class ChatServer {
         }
     }
 
+    public synchronized ClientHandler isSubscribed(String username) {
+        for (ClientHandler clientHandler : clientHandlers) {
+            if (clientHandler.getUser().equals(username)) return clientHandler;
+        }
+        return null;
+    }
+
+    public void sendPrivateMessage(ClientHandler addressee, MessageDTO dto) {
+        addressee.sendMessage(dto);
+    }
+
     public synchronized void subscribe(ClientHandler c) {
         clientHandlers.add(c);
     }
