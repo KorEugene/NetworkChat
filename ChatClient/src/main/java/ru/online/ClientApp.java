@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.io.IOException;
 
 public class ClientApp extends Application {
 
@@ -18,9 +19,14 @@ public class ClientApp extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         mainStage = primaryStage;
-        MainWindow.displayLoginWindow(mainStage);
+        try {
+            MainWindow.initMainWindow();
+            LoginWindow.displayLoginWindow(mainStage);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public static int getDefaultScreenWidth() {

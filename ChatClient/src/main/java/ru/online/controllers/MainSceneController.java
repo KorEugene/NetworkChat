@@ -14,6 +14,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import ru.online.ClientApp;
+import ru.online.LoginWindow;
 import ru.online.MainWindow;
 import ru.online.SettingsWindow;
 import ru.online.messages.MessageDTO;
@@ -34,14 +35,6 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
     @FXML
-    public TextField loginField;
-    @FXML
-    public TextField passField;
-    @FXML
-    public Button btnLogin;
-    @FXML
-    public Button btnCancel;
-    @FXML
     private TextArea chatArea;
     @FXML
     private ListView onlineUsers;
@@ -55,32 +48,15 @@ public class MainSceneController implements Initializable, MessageProcessor {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         messageService = new ChatMessageService("localhost", 65500, this);
-//        onlineUsers.setItems(FXCollections.observableArrayList("Vasya", "Petya", "Kolya"));
+        onlineUsers.setItems(FXCollections.observableArrayList("Vasya", "Petya", "Kolya"));
     }
 
     @FXML
-    private void btnLogin(ActionEvent actionEvent) {
-        String log = loginField.getText();
-        String pass = passField.getText();
-        if (log.equals("") || pass.equals("")) return;
-        MessageDTO dto = new MessageDTO();
-        dto.setLogin(log);
-        dto.setPassword(pass);
-        dto.setMessageType(MessageType.SEND_AUTH_MESSAGE);
-        messageService.sendMessage(dto.convertToJson());
-        System.out.println("Sent " + log + " " + pass);
-    }
-
-    @FXML
-    private void btnCancel(ActionEvent actionEvent) {
-        MainWindow.closeProgram();
-    }
-
-    @FXML
-    private void logout(ActionEvent actionEvent) {
+    private void logout(ActionEvent actionEvent) throws IOException {
         messageService.sendMessage("/exit");
-//        MainWindow.getMainWindow().close();
-        MainWindow.displayLoginWindow(ClientApp.getMainStage());
+        MainWindow.getMainWindow().close();
+        MainWindow.getMainWindow().close();
+        LoginWindow.displayLoginWindow(ClientApp.getMainStage());
     }
 
     @FXML
@@ -115,13 +91,13 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void sendMessage() {
-        String message = input.getText();
+        String message = input.getText().trim();
         if (message.length() > 0) {
             MessageDTO dto = new MessageDTO();
             dto.setMessageType(MessageType.PUBLIC_MESSAGE);
             dto.setBody(message);
+            System.out.println(dto.toString());
             messageService.sendMessage(dto.convertToJson());
-//            messageService.sendMessage(message);
             input.clear();
         }
     }
@@ -132,13 +108,22 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     @Override
     public void processMessage(String msg) {
-        MessageDTO dto = MessageDTO.convertFromJson(msg);
-        System.out.println("Received message" + dto.toString());
-        switch (dto.getMessageType()) {
-            case PUBLIC_MESSAGE -> showBroadcastMessage(dto.getFrom() + " " + dto.getBody());
-            case AUTH_CONFIRM -> MainWindow.displayMainWindow("loginField.getText()");
-            case ERROR_MESSAGE -> showError(dto);
-        }
+        Platform.runLater(() -> {
+            MessageDTO dto = MessageDTO.convertFromJson(msg);
+            System.out.println("Received message" + dto.toString());
+            switch (dto.getMessageType()) {
+                case PUBLIC_MESSAGE -> showBroadcastMessage(dto.getFrom() + " " + dto.getBody());
+                case AUTH_CONFIRM -> {
+                    try {
+                        MainWindow.displayMainWindow(dto.getBody());
+                        LoginWindow.getLoginWindow().close();
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                    }
+                }
+                case ERROR_MESSAGE -> showError(dto);
+            }
+        });
     }
 
     private void showError(Exception e) {

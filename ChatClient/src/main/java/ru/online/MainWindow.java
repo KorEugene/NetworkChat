@@ -17,85 +17,38 @@ public class MainWindow {
     private static final String MAIN_TITLE = "Just Java Chat";
     private static final String PATH_TO_MAIN_ICON = "/img/chat_icon.png";
 
-    private static final String LOGIN_SCENE_FXML = "/LoginScene.fxml";
-    private static final String LOGIN_TITLE = "Login";
-    private static final String PATH_TO_LOGIN_ICON = "/img/login_icon.png";
-
-    private static Stage window;
-
+    private static Stage mainWindow;
     private static FXMLLoader mainLoader;
 
-    public static void displayLoginWindow(Stage primaryStage) {
+    public static void initMainWindow() throws IOException {
 
-        window = primaryStage;
-        window.setOnCloseRequest(e -> {
+        int defScreenWidth = ClientApp.getDefaultScreenWidth();
+        int defScreenHeight = ClientApp.getDefaultScreenHeight();
+
+        mainWindow = new Stage();
+        double windowWidth = defScreenWidth / 2.0;
+        double windowHeight = defScreenHeight / 2.0;
+
+        InputStream chatIconStream = MainWindow.class.getResourceAsStream(PATH_TO_MAIN_ICON);
+        Image chatIcon = new Image(chatIconStream);
+        mainWindow.getIcons().add(chatIcon);
+
+        mainLoader = new FXMLLoader(MainWindow.class.getResource(MAIN_SCENE_FXML));
+        Scene mainScene = new Scene(mainLoader.load(), windowWidth, windowHeight);
+
+        mainWindow.setOnCloseRequest(e -> {
             e.consume();
             MainWindow.closeProgram();
         });
-        window.setTitle(LOGIN_TITLE);
 
-        InputStream loginIconStream = MainWindow.class.getResourceAsStream(PATH_TO_LOGIN_ICON);
-        Image chatIcon = new Image(loginIconStream);
-        window.getIcons().add(chatIcon);
-
-        FXMLLoader loginLoader = new FXMLLoader(MainWindow.class.getResource(LOGIN_SCENE_FXML));
-        double windowWidth = ClientApp.getDefaultScreenWidth() / 6.0;
-        double windowHeight = ClientApp.getDefaultScreenHeight() / 7.0;
-        Scene loginScene = null;
-        try {
-            loginScene = new Scene(loginLoader.load(), windowWidth, windowHeight);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
-        Utility.centerStage(window, windowWidth, windowHeight);
-        window.setResizable(false);
-        window.setScene(loginScene);
-        window.show();
+        Utility.centerStage(mainWindow, windowWidth, windowHeight);
+        mainWindow.setScene(mainScene);
     }
 
-    public static void displayMainWindow(String login) {
+    public static void displayMainWindow(String login) throws IOException {
 
-        double windowWidth = ClientApp.getDefaultScreenWidth() / 2.0;
-        double windowHeight = ClientApp.getDefaultScreenHeight() / 2.0;
-
-//        InputStream chatIconStream = MainWindow.class.getResourceAsStream(PATH_TO_MAIN_ICON);
-//        Image chatIcon = new Image(chatIconStream);
-//        window.getIcons().removeAll();
-//        window.getIcons().add(chatIcon);
-
-//        Platform.runLater(() -> {
-//            FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource(MAIN_SCENE_FXML));
-//            Scene mainScene = null;
-//            try {
-//                mainScene = new Scene(loader.load(), windowWidth, windowHeight);
-//            } catch (IOException exception) {
-//                exception.printStackTrace();
-//            }
-//            Utility.centerStage(window, windowWidth, windowHeight);
-//            window.setScene(mainScene);
-//            window.show();
-//        });
-        FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource(MAIN_SCENE_FXML));
-        Scene mainScene = null;
-        try {
-            mainScene = new Scene(loader.load(), windowWidth, windowHeight);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
-//        mainStage.setOnCloseRequest(e -> {
-//            e.consume();
-//            MainWindow.closeProgram();
-//        });
-
-        Utility.centerStage(window, windowWidth, windowHeight);
-//        window.setTitle(MAIN_TITLE + String.format(" (Logged in as: %s)", login));
-        Scene finalMainScene = mainScene;
-        window.setScene(finalMainScene);
-        window.show();
-//        window.setScene(mainScene);
-//        window.show();
+        mainWindow.setTitle(MAIN_TITLE + String.format(" (Logged in as: %s)", login));
+        mainWindow.show();
     }
 
     public static void closeProgram() {
@@ -106,21 +59,17 @@ public class MainWindow {
             System.out.println(exception.getMessage());
         }
         if (answer) {
+            MainSceneController controller = mainLoader.getController();
+            controller.getMessageService().sendMessage("/exit");
             Platform.exit();
         }
     }
 
-//    public static void closeProgram() {
-//        boolean answer = false;
-//        try {
-//            answer = ConfirmWindow.display();
-//        } catch (IOException exception) {
-//            System.out.println(exception.getMessage());
-//        }
-//        if (answer) {
-//            MainSceneController controller = mainLoader.getController();
-//            controller.getMessageService().sendMessage("/exit");
-//            Platform.exit();
-//        }
-//    }
+    public static Stage getMainWindow() {
+        return mainWindow;
+    }
+
+    public static FXMLLoader getMainLoader() {
+        return mainLoader;
+    }
 }

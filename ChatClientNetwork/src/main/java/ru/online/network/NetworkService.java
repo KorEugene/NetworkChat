@@ -1,7 +1,5 @@
 package ru.online.network;
 
-import javafx.application.Platform;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -22,7 +20,6 @@ public class NetworkService {
             while (true) {
                 try {
                     String msg = inputStream.readUTF();
-//                    Platform.runLater(() -> messageService.receiveMessage(msg));
                     messageService.receiveMessage(msg);
                 } catch (IOException e) {
                     e.printStackTrace();
