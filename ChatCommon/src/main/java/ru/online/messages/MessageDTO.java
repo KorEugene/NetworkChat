@@ -69,6 +69,13 @@ public class MessageDTO {
 
     @Override
     public String toString() {
-        return "messageType= " + messageType + " ,username= " + body;
+        return "MessageDTO{" +
+                "messageType=" + messageType +
+                ", body='" + body + '\'' +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", to='" + to + '\'' +
+                ", from='" + from + '\'' +
+                '}';
     }
 }

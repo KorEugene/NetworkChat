@@ -19,6 +19,7 @@ public class MainWindow {
 
     private static Stage mainWindow;
     private static FXMLLoader mainLoader;
+    private static String userLogin;
 
     public static void initMainWindow() throws IOException {
 
@@ -47,7 +48,8 @@ public class MainWindow {
 
     public static void displayMainWindow(String login) throws IOException {
 
-        mainWindow.setTitle(MAIN_TITLE + String.format(" (Logged in as: %s)", login));
+        userLogin = login;
+        mainWindow.setTitle(MAIN_TITLE + String.format(" (Logged in as: %s)", userLogin));
         mainWindow.show();
     }
 
@@ -71,5 +73,9 @@ public class MainWindow {
 
     public static FXMLLoader getMainLoader() {
         return mainLoader;
+    }
+
+    public static String getUserLogin() {
+        return userLogin;
     }
 }

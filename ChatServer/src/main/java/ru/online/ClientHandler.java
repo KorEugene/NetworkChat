@@ -51,7 +51,13 @@ public class ClientHandler {
                 switch (dto.getMessageType()) {
 //                    case SEND_AUTH_MESSAGE -> authenticate(dto);
                     case PUBLIC_MESSAGE -> chatServer.broadcastMessage(dto);
-//                    case PRIVATE_MESSAGE -> send;
+                    case PRIVATE_MESSAGE -> {
+                        ClientHandler addressee = chatServer.isSubscribed(dto.getTo());
+                        if (addressee != null) {
+                            chatServer.sendPrivateMessage(addressee, dto);
+                            chatServer.sendPrivateMessage(this, dto);
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
@@ -98,4 +104,7 @@ public class ClientHandler {
         }
     }
 
+    public String getUser() {
+        return user;
+    }
 }

@@ -94,15 +94,27 @@ public class MainSceneController implements Initializable, MessageProcessor {
         String message = input.getText().trim();
         if (message.length() > 0) {
             MessageDTO dto = new MessageDTO();
-            dto.setMessageType(MessageType.PUBLIC_MESSAGE);
-            dto.setBody(message);
+            dto.setMessageType(checkMessageType(message));
+            if (dto.getMessageType().equals(MessageType.PRIVATE_MESSAGE)) {
+                dto.setTo((message.split(" ", 3))[1]);
+                dto.setBody((message.split(" ", 3))[2]);
+            } else {
+                dto.setBody(message);
+            }
             System.out.println(dto.toString());
             messageService.sendMessage(dto.convertToJson());
             input.clear();
         }
     }
 
-    private void showBroadcastMessage(String message) {
+    private MessageType checkMessageType(String message) {
+        if (message.startsWith("/w")) {
+            return MessageType.PRIVATE_MESSAGE;
+        }
+        return MessageType.PUBLIC_MESSAGE;
+    }
+
+    private void showMessage(String message) {
         chatArea.appendText(message + System.lineSeparator());
     }
 
@@ -110,9 +122,16 @@ public class MainSceneController implements Initializable, MessageProcessor {
     public void processMessage(String msg) {
         Platform.runLater(() -> {
             MessageDTO dto = MessageDTO.convertFromJson(msg);
-            System.out.println("Received message" + dto.toString());
+            System.out.println("Received message: " + dto.toString());
             switch (dto.getMessageType()) {
-                case PUBLIC_MESSAGE -> showBroadcastMessage(dto.getFrom() + " " + dto.getBody());
+                case PUBLIC_MESSAGE -> showMessage(dto.getFrom() + ": " + dto.getBody());
+                case PRIVATE_MESSAGE -> {
+                    if (dto.getFrom().equals(MainWindow.getUserLogin())) {
+                        showMessage(String.format("[private to: %s] ", dto.getTo()) + dto.getBody());
+                    } else {
+                        showMessage(String.format("[private from: %s] ", dto.getFrom()) + dto.getBody());
+                    }
+                }
                 case AUTH_CONFIRM -> {
                     try {
                         MainWindow.displayMainWindow(dto.getBody());

@@ -37,7 +37,7 @@ public class LoginSceneController {
         dto.setPassword(pass);
         dto.setMessageType(MessageType.SEND_AUTH_MESSAGE);
         messageService.sendMessage(dto.convertToJson());
-        System.out.println("Sent " + log + " " + pass);
+        System.out.println("Sent credentials.");
     }
 
     @FXML
