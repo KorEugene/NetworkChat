@@ -8,7 +8,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -34,6 +33,8 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
+    private final String ALL = "SEND TO ALL";
+
     @FXML
     private TextArea chatArea;
     @FXML
@@ -48,12 +49,11 @@ public class MainSceneController implements Initializable, MessageProcessor {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         messageService = new ChatMessageService("localhost", 65500, this);
-        onlineUsers.setItems(FXCollections.observableArrayList("Vasya", "Petya", "Kolya"));
     }
 
     @FXML
     private void logout(ActionEvent actionEvent) throws IOException {
-        messageService.sendMessage("/exit");
+//        messageService.sendMessage("/exit");
         MainWindow.getMainWindow().close();
         MainWindow.getMainWindow().close();
         LoginWindow.displayLoginWindow(ClientApp.getMainStage());
@@ -75,6 +75,12 @@ public class MainSceneController implements Initializable, MessageProcessor {
         SettingsWindow.display();
     }
 
+    private void refreshUserList(MessageDTO dto) {
+        dto.getUsersOnline().add(0, ALL);
+        onlineUsers.setItems(FXCollections.observableArrayList(dto.getUsersOnline()));
+        onlineUsers.getSelectionModel().selectFirst();
+    }
+
     @FXML
     private void pressEnter(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.ENTER && keyEvent.isShiftDown()) {
@@ -91,47 +97,36 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void sendMessage() {
-        String message = input.getText().trim();
-        if (message.length() > 0) {
-            MessageDTO dto = new MessageDTO();
-            dto.setMessageType(checkMessageType(message));
-            if (dto.getMessageType().equals(MessageType.PRIVATE_MESSAGE)) {
-                dto.setTo((message.split(" ", 3))[1]);
-                dto.setBody((message.split(" ", 3))[2]);
-            } else {
-                dto.setBody(message);
-            }
-            System.out.println(dto.toString());
-            messageService.sendMessage(dto.convertToJson());
-            input.clear();
+        String msg = input.getText().trim();
+        if (msg.length() == 0) return;
+
+        MessageDTO dto = new MessageDTO();
+        String selected = (String) onlineUsers.getSelectionModel().getSelectedItem();
+        if (selected.equals(ALL)) dto.setMessageType(MessageType.PUBLIC_MESSAGE);
+        else {
+            dto.setMessageType(MessageType.PRIVATE_MESSAGE);
+            dto.setTo(selected);
         }
+
+        dto.setBody(msg);
+        messageService.sendMessage(dto.convertToJson());
+        input.clear();
+
     }
 
-    private MessageType checkMessageType(String message) {
-        if (message.startsWith("/w")) {
-            return MessageType.PRIVATE_MESSAGE;
-        }
-        return MessageType.PUBLIC_MESSAGE;
-    }
-
-    private void showMessage(String message) {
-        chatArea.appendText(message + System.lineSeparator());
+    private void showMessage(MessageDTO message) {
+        String msg = String.format("[%s] [%s] -> %s\n", message.getMessageType(), message.getFrom(), message.getBody());
+        chatArea.appendText(msg);
     }
 
     @Override
     public void processMessage(String msg) {
         Platform.runLater(() -> {
             MessageDTO dto = MessageDTO.convertFromJson(msg);
-            System.out.println("Received message: " + dto.toString());
+            System.out.println("Received message: ");
             switch (dto.getMessageType()) {
-                case PUBLIC_MESSAGE -> showMessage(dto.getFrom() + ": " + dto.getBody());
-                case PRIVATE_MESSAGE -> {
-                    if (dto.getFrom().equals(MainWindow.getUserLogin())) {
-                        showMessage(String.format("[private to: %s] ", dto.getTo()) + dto.getBody());
-                    } else {
-                        showMessage(String.format("[private from: %s] ", dto.getFrom()) + dto.getBody());
-                    }
-                }
+                case PUBLIC_MESSAGE, PRIVATE_MESSAGE -> showMessage(dto);
+                case CLIENTS_LIST_MESSAGE -> refreshUserList(dto);
                 case AUTH_CONFIRM -> {
                     try {
                         MainWindow.displayMainWindow(dto.getBody());
