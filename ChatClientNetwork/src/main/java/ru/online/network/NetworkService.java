@@ -22,7 +22,9 @@ public class NetworkService {
                     String msg = inputStream.readUTF();
                     messageService.receiveMessage(msg);
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
+                    System.out.println("Socket closed by time out!");
+                    break;
                 }
             }
         });

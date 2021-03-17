@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.*;
 
 public class ClientHandler {
 
@@ -49,13 +50,13 @@ public class ClientHandler {
                 dto.setFrom(currentUserName);
 
                 switch (dto.getMessageType()) {
-//                    case SEND_AUTH_MESSAGE -> authenticate(dto);
                     case PUBLIC_MESSAGE -> chatServer.broadcastMessage(dto);
                     case PRIVATE_MESSAGE -> chatServer.sendPrivateMessage(dto);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println(e.getMessage());
             Thread.currentThread().interrupt();
         } finally {
             closeHandler();
@@ -63,8 +64,9 @@ public class ClientHandler {
     }
 
     private void authenticate() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         System.out.println("Authenticate started!");
-        try {
+        Future<Boolean> task = executorService.submit(() -> {
             while (true) {
                 String authMessage = inputStream.readUTF();
                 System.out.println("received msg ");
@@ -87,14 +89,18 @@ public class ClientHandler {
                     chatServer.subscribe(this);
                     System.out.println("Subscribed");
                     sendMessage(response);
-                    break;
+                    return true;
                 }
-
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        });
+        try {
+            task.get(120, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            e.printStackTrace();
+            System.out.println("Client timed out!");
             closeHandler();
         }
+        executorService.shutdown();
     }
 
     public void closeHandler() {
