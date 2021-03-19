@@ -13,5 +13,12 @@
         <module name="ChatCommon" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ChatClient" target="15" />
+      <module name="ChatClientNetwork" target="15" />
+      <module name="ChatCommon" target="15" />
+      <module name="ChatServer" target="15" />
+      <module name="NetworkChat" target="15" />
+    </bytecodeTargetLevel>
   </component>
 </project>

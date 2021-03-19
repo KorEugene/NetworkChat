@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.*;
 
 public class ClientHandler {
 
@@ -14,7 +15,7 @@ public class ClientHandler {
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
     private ChatServer chatServer;
-    private String user;
+    private String currentUserName;
 
     public ClientHandler(Socket socket, ChatServer chatServer) {
         try {
@@ -43,56 +44,63 @@ public class ClientHandler {
 
     private void readMessages() {
         try {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted() || socket.isConnected()) {
                 String msg = inputStream.readUTF();
                 MessageDTO dto = MessageDTO.convertFromJson(msg);
-                dto.setFrom(user);
+                dto.setFrom(currentUserName);
 
                 switch (dto.getMessageType()) {
-//                    case SEND_AUTH_MESSAGE -> authenticate(dto);
                     case PUBLIC_MESSAGE -> chatServer.broadcastMessage(dto);
-                    case PRIVATE_MESSAGE -> {
-                        ClientHandler addressee = chatServer.isSubscribed(dto.getTo());
-                        if (addressee != null) {
-                            chatServer.sendPrivateMessage(addressee, dto);
-                            chatServer.sendPrivateMessage(this, dto);
-                        }
-                    }
+                    case PRIVATE_MESSAGE -> chatServer.sendPrivateMessage(dto);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Thread.currentThread().interrupt();
+        } finally {
+            closeHandler();
         }
     }
 
     private void authenticate() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         System.out.println("Authenticate started!");
-        try {
+        Future<Boolean> task = executorService.submit(() -> {
             while (true) {
                 String authMessage = inputStream.readUTF();
                 System.out.println("received msg ");
                 MessageDTO dto = MessageDTO.convertFromJson(authMessage);
                 String username = chatServer.getAuthService().getUsernameByLoginPass(dto.getLogin(), dto.getPassword());
-                MessageDTO send = new MessageDTO();
+                MessageDTO response = new MessageDTO();
                 if (username == null) {
-                    send.setMessageType(MessageType.ERROR_MESSAGE);
-                    send.setBody("Wrong login or pass!");
+                    response.setMessageType(MessageType.ERROR_MESSAGE);
+                    response.setBody("Wrong login or pass!");
                     System.out.println("Wrong auth");
-                    sendMessage(send);
+                    sendMessage(response);
+                } else if (chatServer.isUserBusy(username)) {
+                    response.setMessageType(MessageType.ERROR_MESSAGE);
+                    response.setBody("U're clone!!!");
+                    System.out.println("Clone");
                 } else {
-                    send.setMessageType(MessageType.AUTH_CONFIRM);
-                    send.setBody(username);
-                    user = username;
+                    response.setMessageType(MessageType.AUTH_CONFIRM);
+                    response.setBody(username);
+                    currentUserName = username;
                     chatServer.subscribe(this);
                     System.out.println("Subscribed");
-                    sendMessage(send);
-                    break;
+                    sendMessage(response);
+                    return true;
                 }
-
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        });
+        try {
+            task.get(120, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            e.printStackTrace();
+            System.out.println("Client timed out!");
+            closeHandler();
         }
+        executorService.shutdown();
     }
 
     public void closeHandler() {
@@ -104,7 +112,7 @@ public class ClientHandler {
         }
     }
 
-    public String getUser() {
-        return user;
+    public String getCurrentUserName() {
+        return currentUserName;
     }
 }
