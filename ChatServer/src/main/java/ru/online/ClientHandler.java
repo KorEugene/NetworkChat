@@ -82,6 +82,7 @@ public class ClientHandler {
                     response.setMessageType(MessageType.ERROR_MESSAGE);
                     response.setBody("U're clone!!!");
                     System.out.println("Clone");
+                    sendMessage(response);
                 } else {
                     response.setMessageType(MessageType.AUTH_CONFIRM);
                     response.setBody(username);
