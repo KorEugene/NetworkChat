@@ -2,6 +2,7 @@ package ru.online;
 
 import ru.online.auth.AuthService;
 import ru.online.auth.PrimitiveAuthService;
+import ru.online.auth.SQLiteAuthService;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 
@@ -21,7 +22,8 @@ public class ChatServer {
     public ChatServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT_NUMBER)) {
             System.out.println("Server started");
-            authService = new PrimitiveAuthService();
+//            authService = new PrimitiveAuthService();
+            authService = new SQLiteAuthService();
             authService.start();
             onlineClientsList = new LinkedList<>();
             while (true) {
