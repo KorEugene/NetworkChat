@@ -6,11 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import ru.online.AlertWindow;
 import ru.online.LoginWindow;
 import ru.online.MainWindow;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 import ru.online.network.MessageService;
+
+import java.io.IOException;
 
 public class LoginSceneController {
 
@@ -31,7 +34,14 @@ public class LoginSceneController {
     private void btnLogin(ActionEvent actionEvent) {
         String log = loginField.getText();
         String pass = passField.getText();
-        if (log.equals("") || pass.equals("")) return;
+        if (log.equals("") || pass.equals("")) {
+            try {
+                AlertWindow.display();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+            return;
+        }
         MessageDTO dto = new MessageDTO();
         dto.setLogin(log);
         dto.setPassword(pass);

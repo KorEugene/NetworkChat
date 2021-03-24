@@ -12,10 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
-import ru.online.ClientApp;
-import ru.online.LoginWindow;
-import ru.online.MainWindow;
-import ru.online.SettingsWindow;
+import ru.online.*;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 import ru.online.network.ChatMessageService;
@@ -53,9 +50,8 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     @FXML
     private void logout(ActionEvent actionEvent) throws IOException {
-//        messageService.sendMessage("/exit");
-//        MainWindow.getMainWindow().close();
         MainWindow.getMainWindow().close();
+        chatArea.clear();
         messageService.disconnectFromServer();
         messageService = new ChatMessageService("localhost", 65500, this);
         LoginWindow.displayLoginWindow(ClientApp.getMainStage());
@@ -133,6 +129,14 @@ public class MainSceneController implements Initializable, MessageProcessor {
                     try {
                         MainWindow.displayMainWindow(dto.getBody());
                         LoginWindow.getLoginWindow().close();
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                    }
+                }
+                case SETTINGS_USERNAME_CONFIRM -> {
+                    try {
+                        InfoWindow.display();
+                        SettingsWindow.getSettingsWindow().close();
                     } catch (IOException exception) {
                         exception.printStackTrace();
                     }

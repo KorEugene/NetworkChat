@@ -49,11 +49,11 @@ public class ChatServer {
     public synchronized void broadcastOnlineClients() {
         MessageDTO dto = new MessageDTO();
         dto.setMessageType(MessageType.CLIENTS_LIST_MESSAGE);
-        List<String> onlines = new LinkedList<>();
+        List<String> onlineClients = new LinkedList<>();
         for (ClientHandler clientHandler : onlineClientsList) {
-            onlines.add(clientHandler.getCurrentUserName());
+            onlineClients.add(clientHandler.getCurrentUserName());
         }
-        dto.setUsersOnline(onlines);
+        dto.setUsersOnline(onlineClients);
         broadcastMessage(dto);
     }
 
@@ -68,6 +68,14 @@ public class ChatServer {
         for (ClientHandler clientHandler : onlineClientsList) {
             clientHandler.sendMessage(dto);
         }
+    }
+
+    public synchronized boolean usernameIsExist(String username) {
+        return authService.checkUsername(username);
+    }
+
+    public synchronized void updateUsername(String currentUsername, String newUsername) {
+        authService.updateUsername(currentUsername, newUsername);
     }
 
     public synchronized void subscribe(ClientHandler c) {

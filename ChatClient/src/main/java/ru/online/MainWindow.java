@@ -61,8 +61,8 @@ public class MainWindow {
             System.out.println(exception.getMessage());
         }
         if (answer) {
-            MainSceneController controller = mainLoader.getController();
-            controller.getMessageService().sendMessage("/exit");
+//            MainSceneController controller = mainLoader.getController();
+//            controller.getMessageService().sendMessage("/exit");
             Platform.exit();
         }
     }

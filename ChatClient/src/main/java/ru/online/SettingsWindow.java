@@ -16,11 +16,13 @@ public class SettingsWindow {
     private static final String SETTINGS_TITLE = "Settings";
     private static final String PATH_TO_SETTINGS_ICON = "/img/settings_icon.png";
     private static final int WINDOW_WIDTH = 300;
-    private static final int WINDOW_HEIGHT = 180;
+    private static final int WINDOW_HEIGHT = 200;
+
+    private static Stage settingsWindow;
 
     public static void display() throws IOException {
 
-        Stage settingsWindow = new Stage();
+        settingsWindow = new Stage();
         settingsWindow.initModality(Modality.APPLICATION_MODAL);
         settingsWindow.setTitle(SETTINGS_TITLE);
 
@@ -35,5 +37,9 @@ public class SettingsWindow {
         settingsWindow.setScene(settingsScene);
         settingsWindow.setResizable(false);
         settingsWindow.showAndWait();
+    }
+
+    public static Stage getSettingsWindow() {
+        return settingsWindow;
     }
 }

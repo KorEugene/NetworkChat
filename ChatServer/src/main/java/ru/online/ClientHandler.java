@@ -52,6 +52,20 @@ public class ClientHandler {
                 switch (dto.getMessageType()) {
                     case PUBLIC_MESSAGE -> chatServer.broadcastMessage(dto);
                     case PRIVATE_MESSAGE -> chatServer.sendPrivateMessage(dto);
+                    case SETTINGS_USERNAME_MESSAGE -> {
+                        MessageDTO response = new MessageDTO();
+                        String newUsername = dto.getBody();
+                        if (chatServer.usernameIsExist(newUsername)) {
+                            response.setMessageType(MessageType.ERROR_MESSAGE);
+                            response.setBody("Username is busy!");
+                            System.out.println(newUsername + " username is busy");
+                        } else {
+                            chatServer.updateUsername(currentUserName, newUsername);
+                            response.setMessageType(MessageType.SETTINGS_USERNAME_CONFIRM);
+                            System.out.println("Username: " + currentUserName + " was changed: " + newUsername);
+                        }
+                        sendMessage(response);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -80,7 +94,7 @@ public class ClientHandler {
                     sendMessage(response);
                 } else if (chatServer.isUserBusy(username)) {
                     response.setMessageType(MessageType.ERROR_MESSAGE);
-                    response.setBody("U're clone!!!");
+                    response.setBody("You are clone!!!");
                     System.out.println("Clone");
                     sendMessage(response);
                 } else {

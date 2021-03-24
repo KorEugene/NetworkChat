@@ -45,7 +45,34 @@ public class SQLiteAuthService implements AuthService {
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
-        return username ;
+        return username;
+    }
+
+    @Override
+    public void updateUsername(String currentUsername, String newUsername) {
+        try {
+            ps = connection.prepareStatement("UPDATE clients SET username = ? WHERE username = ?;");
+            ps.setString(1, newUsername);
+            ps.setString(2, currentUsername);
+            ps.executeUpdate();
+        } catch (SQLException exception) {
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    @Override
+    public boolean checkUsername(String newUsername) {
+        try {
+            ps = connection.prepareStatement("SELECT username FROM clients WHERE username = ?;");
+            ps.setString(1, newUsername);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException exception) {
+            System.out.println(exception.getMessage());
+        }
+        return false;
     }
 
     private void getClients() {

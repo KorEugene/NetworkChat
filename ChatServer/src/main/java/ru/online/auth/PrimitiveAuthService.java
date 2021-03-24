@@ -33,4 +33,15 @@ public class PrimitiveAuthService implements AuthService {
         }
         return null;
     }
+
+    @Override
+    public boolean checkUsername(String newUsername) {
+        // Dummy
+        return false;
+    }
+
+    @Override
+    public void updateUsername(String currentUsername, String newUsername) {
+        // Dummy
+    }
 }

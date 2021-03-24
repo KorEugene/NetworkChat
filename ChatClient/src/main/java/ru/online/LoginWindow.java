@@ -30,11 +30,13 @@ public class LoginWindow {
         });
         loginWindow.setTitle(LOGIN_TITLE);
 
-        InputStream loginIconStream = MainWindow.class.getResourceAsStream(PATH_TO_LOGIN_ICON);
+//        InputStream loginIconStream = MainWindow.class.getResourceAsStream(PATH_TO_LOGIN_ICON);
+        InputStream loginIconStream = LoginWindow.class.getResourceAsStream(PATH_TO_LOGIN_ICON);
         Image chatIcon = new Image(loginIconStream);
         loginWindow.getIcons().add(chatIcon);
 
-        FXMLLoader loginLoader = new FXMLLoader(MainWindow.class.getResource(LOGIN_SCENE_FXML));
+//        FXMLLoader loginLoader = new FXMLLoader(MainWindow.class.getResource(LOGIN_SCENE_FXML));
+        FXMLLoader loginLoader = new FXMLLoader(LoginWindow.class.getResource(LOGIN_SCENE_FXML));
         double windowWidth = defScreenWidth / 6.0;
         double windowHeight = defScreenHeight / 7.0;
         Scene loginScene = new Scene(loginLoader.load(), windowWidth, windowHeight);
