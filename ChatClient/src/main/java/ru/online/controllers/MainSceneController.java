@@ -54,8 +54,10 @@ public class MainSceneController implements Initializable, MessageProcessor {
     @FXML
     private void logout(ActionEvent actionEvent) throws IOException {
 //        messageService.sendMessage("/exit");
+//        MainWindow.getMainWindow().close();
         MainWindow.getMainWindow().close();
-        MainWindow.getMainWindow().close();
+        messageService.disconnectFromServer();
+        messageService = new ChatMessageService("localhost", 65500, this);
         LoginWindow.displayLoginWindow(ClientApp.getMainStage());
     }
 
@@ -115,7 +117,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void showMessage(MessageDTO message) {
-        String msg = String.format("[%s] [%s] -> %s\n", message.getMessageType(), message.getFrom(), message.getBody());
+        String msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), message.getFrom(), message.getBody());
         chatArea.appendText(msg);
     }
 

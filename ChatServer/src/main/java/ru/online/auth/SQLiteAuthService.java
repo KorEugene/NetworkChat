@@ -33,7 +33,7 @@ public class SQLiteAuthService implements AuthService {
 
     @Override
     public String getUsernameByLoginPass(String login, String pass) {
-        String username = "";
+        String username = null;
         try {
             ps = connection.prepareStatement("SELECT username FROM clients WHERE login = ? AND password = ?;");
             ps.setString(1, login);

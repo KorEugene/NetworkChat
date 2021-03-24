@@ -32,6 +32,14 @@ public class NetworkService {
         t.start();
     }
 
+    public void closeSocket() {
+        try {
+            socket.close();
+        } catch (IOException exception) {
+            System.out.println("Socket closed by time out!");
+        }
+    }
+
     public void writeMessage(String msg) {
         try {
             outputStream.writeUTF(msg);
