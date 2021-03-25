@@ -41,7 +41,9 @@ public class MainSceneController implements Initializable, MessageProcessor {
     @FXML
     private TextArea input;
 
+    private String username;
     private MessageService messageService;
+    private InfoSceneController infoSceneController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -113,7 +115,16 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void showMessage(MessageDTO message) {
-        String msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), message.getFrom(), message.getBody());
+        String msg;
+        if (message.getFrom().equals(username)) {
+            if(message.getTo() == null) {
+                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: All", message.getBody());
+            } else {
+                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: " + message.getTo(), message.getBody());
+            }
+        } else {
+            msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), "To: You", message.getBody());
+        }
         chatArea.appendText(msg);
     }
 
@@ -127,7 +138,8 @@ public class MainSceneController implements Initializable, MessageProcessor {
                 case CLIENTS_LIST_MESSAGE -> refreshUserList(dto);
                 case AUTH_CONFIRM -> {
                     try {
-                        MainWindow.displayMainWindow(dto.getBody());
+                        username = dto.getBody();
+                        MainWindow.displayMainWindow(username);
                         LoginWindow.getLoginWindow().close();
                     } catch (IOException exception) {
                         exception.printStackTrace();
@@ -135,6 +147,9 @@ public class MainSceneController implements Initializable, MessageProcessor {
                 }
                 case SETTINGS_USERNAME_CONFIRM -> {
                     try {
+                        InfoWindow.init();
+                        infoSceneController = InfoWindow.getInfoLoader().getController();
+                        infoSceneController.getLabelMessage().setText("You need re-logon to apply changes!");
                         InfoWindow.display();
                         SettingsWindow.getSettingsWindow().close();
                     } catch (IOException exception) {

@@ -18,9 +18,12 @@ public class InfoWindow {
     private static final int WINDOW_WIDTH = 200;
     private static final int WINDOW_HEIGHT = 120;
 
-    public static void display() throws IOException {
+    private static Stage infoWindow;
+    private static FXMLLoader infoLoader;
 
-        Stage infoWindow = new Stage();
+    public static void init() throws IOException {
+
+        infoWindow = new Stage();
         infoWindow.initModality(Modality.APPLICATION_MODAL);
         infoWindow.setTitle(INFO_TITLE);
 
@@ -28,12 +31,19 @@ public class InfoWindow {
         Image infoIcon = new Image(infoIconStream);
         infoWindow.getIcons().add(infoIcon);
 
-        FXMLLoader loader = new FXMLLoader(InfoWindow.class.getResource(FXML));
-        Scene infoScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        infoLoader = new FXMLLoader(InfoWindow.class.getResource(FXML));
+        Scene infoScene = new Scene(infoLoader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
 
         Utility.centerStage(infoWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
         infoWindow.setScene(infoScene);
         infoWindow.setResizable(false);
+    }
+
+    public static void display() {
         infoWindow.showAndWait();
+    }
+
+    public static FXMLLoader getInfoLoader() {
+        return infoLoader;
     }
 }

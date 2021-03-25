@@ -10,7 +10,7 @@
     <padding>
         <Insets top="20" bottom="20" left="20" right="20"/>
     </padding>
-    <Label text="You need re-logon to apply changes!" textAlignment="CENTER" alignment="CENTER" maxWidth="160"
+    <Label fx:id="labelMessage" textAlignment="CENTER" alignment="CENTER" maxWidth="160"
            wrapText="true"/>
     <Button fx:id="btnOK" prefWidth="140" lineSpacing="10.0" mnemonicParsing="false" onAction="#btnOK"
             text="OK"/>

@@ -6,9 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import ru.online.AlertWindow;
-import ru.online.LoginWindow;
-import ru.online.MainWindow;
+import ru.online.*;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 import ru.online.network.MessageService;
@@ -29,6 +27,7 @@ public class LoginSceneController {
     private FXMLLoader mainLoader = MainWindow.getMainLoader();
     private MainSceneController mainSceneController = mainLoader.getController();
     private MessageService messageService = mainSceneController.getMessageService();
+    private InfoSceneController infoSceneController;
 
     @FXML
     private void btnLogin(ActionEvent actionEvent) {
@@ -36,7 +35,10 @@ public class LoginSceneController {
         String pass = passField.getText();
         if (log.equals("") || pass.equals("")) {
             try {
-                AlertWindow.display();
+                InfoWindow.init();
+                infoSceneController = InfoWindow.getInfoLoader().getController();
+                infoSceneController.getLabelMessage().setText("Empty login/password is not allowed!");
+                InfoWindow.display();
             } catch (IOException exception) {
                 exception.printStackTrace();
             }

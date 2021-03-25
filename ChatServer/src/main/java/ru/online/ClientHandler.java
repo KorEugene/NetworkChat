@@ -51,7 +51,10 @@ public class ClientHandler {
 
                 switch (dto.getMessageType()) {
                     case PUBLIC_MESSAGE -> chatServer.broadcastMessage(dto);
-                    case PRIVATE_MESSAGE -> chatServer.sendPrivateMessage(dto);
+                    case PRIVATE_MESSAGE -> {
+                        chatServer.sendPrivateMessage(dto);
+                        this.sendMessage(dto);
+                    }
                     case SETTINGS_USERNAME_MESSAGE -> {
                         MessageDTO response = new MessageDTO();
                         String newUsername = dto.getBody();
