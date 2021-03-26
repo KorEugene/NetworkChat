@@ -2,6 +2,7 @@ package ru.online;
 
 import ru.online.auth.AuthService;
 import ru.online.auth.PrimitiveAuthService;
+import ru.online.auth.SQLiteAuthService;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 
@@ -21,7 +22,8 @@ public class ChatServer {
     public ChatServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT_NUMBER)) {
             System.out.println("Server started");
-            authService = new PrimitiveAuthService();
+//            authService = new PrimitiveAuthService();
+            authService = new SQLiteAuthService();
             authService.start();
             onlineClientsList = new LinkedList<>();
             while (true) {
@@ -47,11 +49,11 @@ public class ChatServer {
     public synchronized void broadcastOnlineClients() {
         MessageDTO dto = new MessageDTO();
         dto.setMessageType(MessageType.CLIENTS_LIST_MESSAGE);
-        List<String> onlines = new LinkedList<>();
+        List<String> onlineClients = new LinkedList<>();
         for (ClientHandler clientHandler : onlineClientsList) {
-            onlines.add(clientHandler.getCurrentUserName());
+            onlineClients.add(clientHandler.getCurrentUserName());
         }
-        dto.setUsersOnline(onlines);
+        dto.setUsersOnline(onlineClients);
         broadcastMessage(dto);
     }
 
@@ -66,6 +68,14 @@ public class ChatServer {
         for (ClientHandler clientHandler : onlineClientsList) {
             clientHandler.sendMessage(dto);
         }
+    }
+
+    public synchronized boolean usernameIsExist(String username) {
+        return authService.checkUsername(username);
+    }
+
+    public synchronized void updateUsername(String currentUsername, String newUsername) {
+        authService.updateUsername(currentUsername, newUsername);
     }
 
     public synchronized void subscribe(ClientHandler c) {

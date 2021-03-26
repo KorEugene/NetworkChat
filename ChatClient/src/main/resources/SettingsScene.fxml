@@ -10,15 +10,23 @@
             <Insets top="10" bottom="10" left="10" right="10"/>
         </padding>
         <columnConstraints>
-            <ColumnConstraints percentWidth="30"/>
-            <ColumnConstraints percentWidth="70"/>
+            <ColumnConstraints percentWidth="45"/>
+            <ColumnConstraints percentWidth="55"/>
         </columnConstraints>
         <Label text="IP address:" textAlignment="CENTER" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="labIPAddress" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <TextField fx:id="tFIPAddress" style="-fx-font-weight: BOLD; -fx-opacity: 1.0" disable="true"
+                   promptText="coming soon" GridPane.rowIndex="0"
+                   GridPane.columnIndex="1"/>
         <Label text="Incoming port:" textAlignment="CENTER" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="labIncomingPort" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <TextField fx:id="tFIncomingPort" style="-fx-font-weight: BOLD; -fx-opacity: 1.0" disable="true"
+                   promptText="coming soon" GridPane.rowIndex="1"
+                   GridPane.columnIndex="1"/>
         <Label text="Outgoing port:" textAlignment="CENTER" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <TextField fx:id="labOutgoingPort" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <TextField fx:id="tFOutgoingPort" style="-fx-font-weight: BOLD; -fx-opacity: 1.0" disable="true"
+                   promptText="coming soon" GridPane.rowIndex="2"
+                   GridPane.columnIndex="1"/>
+        <Label text="Enter new username:" textAlignment="CENTER" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="tFUsername" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
     </GridPane>
     <GridPane hgap="10" vgap="10">
         <padding>

@@ -26,6 +26,11 @@ public class ChatMessageService implements MessageService {
     }
 
     @Override
+    public void disconnectFromServer() {
+        networkService.closeSocket();
+    }
+
+    @Override
     public void sendMessage(String msg) {
         networkService.writeMessage(msg);
     }

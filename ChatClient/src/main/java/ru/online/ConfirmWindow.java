@@ -26,9 +26,9 @@ public class ConfirmWindow {
         confirmWindow.initModality(Modality.APPLICATION_MODAL);
         confirmWindow.setTitle(CONFIRM_TITLE);
 
-        InputStream chatIconStream = ClientApp.class.getResourceAsStream(PATH_TO_CONFIRM_ICON);
-        Image chatIcon = new Image(chatIconStream);
-        confirmWindow.getIcons().add(chatIcon);
+        InputStream confirmIconStream = ClientApp.class.getResourceAsStream(PATH_TO_CONFIRM_ICON);
+        Image confirmIcon = new Image(confirmIconStream);
+        confirmWindow.getIcons().add(confirmIcon);
 
         FXMLLoader loader = new FXMLLoader(ConfirmWindow.class.getResource(FXML));
         Scene confirmScene = new Scene(loader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);

@@ -5,12 +5,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ru.online.controllers.AlertSceneController"
+      fx:controller="ru.online.controllers.InfoSceneController"
       spacing="20" alignment="CENTER">
     <padding>
         <Insets top="20" bottom="20" left="20" right="20"/>
     </padding>
-    <Label text="Empty login is not allowed!" alignment="CENTER" prefWidth="Infinity"/>
+    <Label fx:id="labelMessage" textAlignment="CENTER" alignment="CENTER" maxWidth="160"
+           wrapText="true"/>
     <Button fx:id="btnOK" prefWidth="140" lineSpacing="10.0" mnemonicParsing="false" onAction="#btnOK"
             text="OK"/>
 </VBox>

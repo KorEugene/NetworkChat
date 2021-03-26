@@ -12,10 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
-import ru.online.ClientApp;
-import ru.online.LoginWindow;
-import ru.online.MainWindow;
-import ru.online.SettingsWindow;
+import ru.online.*;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 import ru.online.network.ChatMessageService;
@@ -44,7 +41,9 @@ public class MainSceneController implements Initializable, MessageProcessor {
     @FXML
     private TextArea input;
 
+    private String username;
     private MessageService messageService;
+    private InfoSceneController infoSceneController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -53,9 +52,10 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     @FXML
     private void logout(ActionEvent actionEvent) throws IOException {
-//        messageService.sendMessage("/exit");
         MainWindow.getMainWindow().close();
-        MainWindow.getMainWindow().close();
+        chatArea.clear();
+        messageService.disconnectFromServer();
+        messageService = new ChatMessageService("localhost", 65500, this);
         LoginWindow.displayLoginWindow(ClientApp.getMainStage());
     }
 
@@ -115,7 +115,16 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void showMessage(MessageDTO message) {
-        String msg = String.format("[%s] [%s] -> %s\n", message.getMessageType(), message.getFrom(), message.getBody());
+        String msg;
+        if (message.getFrom().equals(username)) {
+            if(message.getTo() == null) {
+                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: All", message.getBody());
+            } else {
+                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: " + message.getTo(), message.getBody());
+            }
+        } else {
+            msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), "To: You", message.getBody());
+        }
         chatArea.appendText(msg);
     }
 
@@ -129,8 +138,20 @@ public class MainSceneController implements Initializable, MessageProcessor {
                 case CLIENTS_LIST_MESSAGE -> refreshUserList(dto);
                 case AUTH_CONFIRM -> {
                     try {
-                        MainWindow.displayMainWindow(dto.getBody());
+                        username = dto.getBody();
+                        MainWindow.displayMainWindow(username);
                         LoginWindow.getLoginWindow().close();
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                    }
+                }
+                case SETTINGS_USERNAME_CONFIRM -> {
+                    try {
+                        InfoWindow.init();
+                        infoSceneController = InfoWindow.getInfoLoader().getController();
+                        infoSceneController.getLabelMessage().setText("You need re-logon to apply changes!");
+                        InfoWindow.display();
+                        SettingsWindow.getSettingsWindow().close();
                     } catch (IOException exception) {
                         exception.printStackTrace();
                     }

@@ -22,14 +22,21 @@ public class NetworkService {
                     String msg = inputStream.readUTF();
                     messageService.receiveMessage(msg);
                 } catch (IOException e) {
-//                    e.printStackTrace();
-                    System.out.println("Socket closed by time out!");
+                    System.out.println("Socket closed!");
                     break;
                 }
             }
         });
         t.setDaemon(true);
         t.start();
+    }
+
+    public void closeSocket() {
+        try {
+            socket.close();
+        } catch (IOException exception) {
+            System.out.println("Socket closed!");
+        }
     }
 
     public void writeMessage(String msg) {
