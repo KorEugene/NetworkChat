@@ -20,17 +20,17 @@ import ru.online.network.MessageProcessor;
 import ru.online.network.MessageService;
 
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainSceneController implements Initializable, MessageProcessor {
@@ -38,7 +38,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
     private final String ALL = "SEND TO ALL";
-    private Path historyFilePath;
+    private final int LINES_TO_UNZIP = 3;
 
     @FXML
     private TextArea chatArea;
@@ -51,6 +51,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     private String username;
     private String login;
+    private Path pathToHistory;
     private MessageService messageService;
     private InfoSceneController infoSceneController;
 
@@ -140,9 +141,30 @@ public class MainSceneController implements Initializable, MessageProcessor {
 
     private void writeHistory(String msg) {
         try {
-            Files.writeString(Paths.get(String.format("chat_history_%s.txt", login)), msg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.writeString(pathToHistory, msg, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException exception) {
             showError(exception);
+        }
+    }
+
+    private void readHistory() {
+        List<String> lines = new ArrayList<>();
+        if (!Files.exists(pathToHistory)) return;
+        try {
+            lines = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            showError(exception);
+        }
+        if (lines.size() < LINES_TO_UNZIP) {
+            addHistory(lines, 0);
+        } else {
+            addHistory(lines, lines.size() - LINES_TO_UNZIP);
+        }
+    }
+
+    private void addHistory(List<String> lines, int start) {
+        for (int i = start; i < lines.size(); i++) {
+            chatArea.appendText(lines.get(i) + System.lineSeparator());
         }
     }
 
@@ -158,6 +180,8 @@ public class MainSceneController implements Initializable, MessageProcessor {
                     try {
                         username = dto.getBody();
                         login = dto.getLogin();
+                        pathToHistory = Paths.get(String.format("chat_history_%s.txt", login));
+                        readHistory();
                         MainWindow.displayMainWindow(username);
                         LoginWindow.getLoginWindow().close();
                     } catch (IOException exception) {
