@@ -29,16 +29,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class MainSceneController implements Initializable, MessageProcessor {
 
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
     private final String ALL = "SEND TO ALL";
-    private final int LINES_TO_UNZIP = 3;
+    private final int LINES_TO_UNZIP = 100;
+    private final int HISTORY_UPPER_BOUND = 200;
+    private final int SHRINK_STEP = 100;
 
     @FXML
     private TextArea chatArea;
@@ -52,6 +54,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private String username;
     private String login;
     private Path pathToHistory;
+    private int contentLinesCounter;
     private MessageService messageService;
     private InfoSceneController infoSceneController;
 
@@ -140,31 +143,45 @@ public class MainSceneController implements Initializable, MessageProcessor {
     }
 
     private void writeHistory(String msg) {
+        if (contentLinesCounter > HISTORY_UPPER_BOUND) shrinkHistory();
         try {
             Files.writeString(pathToHistory, msg, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            contentLinesCounter++;
         } catch (IOException exception) {
             showError(exception);
         }
     }
 
     private void readHistory() {
-        List<String> lines = new ArrayList<>();
         if (!Files.exists(pathToHistory)) return;
         try {
-            lines = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+            List<String> historyContent = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+            contentLinesCounter = historyContent.size();
+            if (contentLinesCounter <= LINES_TO_UNZIP) {
+                addHistory(historyContent, 0);
+            } else {
+                addHistory(historyContent, contentLinesCounter - LINES_TO_UNZIP);
+            }
         } catch (IOException exception) {
             showError(exception);
         }
-        if (lines.size() < LINES_TO_UNZIP) {
-            addHistory(lines, 0);
-        } else {
-            addHistory(lines, lines.size() - LINES_TO_UNZIP);
+    }
+
+    private void addHistory(List<String> content, int start) {
+        for (int i = start; i < content.size(); i++) {
+            chatArea.appendText(content.get(i) + System.lineSeparator());
         }
     }
 
-    private void addHistory(List<String> lines, int start) {
-        for (int i = start; i < lines.size(); i++) {
-            chatArea.appendText(lines.get(i) + System.lineSeparator());
+    private void shrinkHistory() {
+        try {
+            List<String> currentHistoryContent = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+            List<String> shrunkenContent = currentHistoryContent.stream().skip(SHRINK_STEP).collect(Collectors.toList());
+            Files.delete(pathToHistory);
+            Files.write(pathToHistory, shrunkenContent, StandardCharsets.UTF_8);
+            contentLinesCounter = shrunkenContent.size();
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
         }
     }
 
