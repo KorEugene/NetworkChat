@@ -20,10 +20,17 @@ import ru.online.network.MessageProcessor;
 import ru.online.network.MessageService;
 
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.ResourceBundle;
 
 public class MainSceneController implements Initializable, MessageProcessor {
@@ -31,6 +38,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
     private final String ALL = "SEND TO ALL";
+    private Path historyFilePath;
 
     @FXML
     private TextArea chatArea;
@@ -42,6 +50,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private TextArea input;
 
     private String username;
+    private String login;
     private MessageService messageService;
     private InfoSceneController infoSceneController;
 
@@ -117,15 +126,24 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private void showMessage(MessageDTO message) {
         String msg;
         if (message.getFrom().equals(username)) {
-            if(message.getTo() == null) {
-                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: All", message.getBody());
+            if (message.getTo() == null) {
+                msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "From: You", message.getBody());
             } else {
-                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: " + message.getTo(), message.getBody());
+                msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "To: " + message.getTo(), message.getBody());
             }
         } else {
-            msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), "To: You", message.getBody());
+            msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), message.getBody());
         }
         chatArea.appendText(msg);
+        writeHistory(msg);
+    }
+
+    private void writeHistory(String msg) {
+        try {
+            Files.writeString(Paths.get(String.format("chat_history_%s.txt", login)), msg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException exception) {
+            showError(exception);
+        }
     }
 
     @Override
@@ -139,6 +157,7 @@ public class MainSceneController implements Initializable, MessageProcessor {
                 case AUTH_CONFIRM -> {
                     try {
                         username = dto.getBody();
+                        login = dto.getLogin();
                         MainWindow.displayMainWindow(username);
                         LoginWindow.getLoginWindow().close();
                     } catch (IOException exception) {
