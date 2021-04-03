@@ -23,11 +23,13 @@ public class ClientHandler {
             this.socket = socket;
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
-            System.out.println("CH created!");
-            new Thread(() -> {
+            System.out.println("Client Handler created!");
+
+            chatServer.getExecutorService().execute(() -> {
+                System.out.println("Client connection execute in: " + Thread.currentThread().getName());
                 authenticate();
                 readMessages();
-            }).start();
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
