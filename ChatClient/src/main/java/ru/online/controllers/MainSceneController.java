@@ -24,13 +24,23 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class MainSceneController implements Initializable, MessageProcessor {
 
     private static final String URI_JAVAFX = "https://openjfx.io/";
 
     private final String ALL = "SEND TO ALL";
+    private final int LINES_TO_UNZIP = 100;
+    private final int HISTORY_UPPER_BOUND = 200;
+    private final int SHRINK_STEP = 100;
 
     @FXML
     private TextArea chatArea;
@@ -42,6 +52,9 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private TextArea input;
 
     private String username;
+    private String login;
+    private Path pathToHistory;
+    private int contentLinesCounter;
     private MessageService messageService;
     private InfoSceneController infoSceneController;
 
@@ -117,15 +130,59 @@ public class MainSceneController implements Initializable, MessageProcessor {
     private void showMessage(MessageDTO message) {
         String msg;
         if (message.getFrom().equals(username)) {
-            if(message.getTo() == null) {
-                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: All", message.getBody());
+            if (message.getTo() == null) {
+                msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "From: You", message.getBody());
             } else {
-                msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: You", "To: " + message.getTo(), message.getBody());
+                msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "To: " + message.getTo(), message.getBody());
             }
         } else {
-            msg = String.format("[%s] [%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), "To: You", message.getBody());
+            msg = String.format("[%s] [%s] -> %s%n", message.getMessageType(), "From: " + message.getFrom(), message.getBody());
         }
         chatArea.appendText(msg);
+        writeHistory(msg);
+    }
+
+    private void writeHistory(String msg) {
+        if (contentLinesCounter > HISTORY_UPPER_BOUND) shrinkHistory();
+        try {
+            Files.writeString(pathToHistory, msg, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            contentLinesCounter++;
+        } catch (IOException exception) {
+            showError(exception);
+        }
+    }
+
+    private void readHistory() {
+        if (!Files.exists(pathToHistory)) return;
+        try {
+            List<String> historyContent = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+            contentLinesCounter = historyContent.size();
+            if (contentLinesCounter <= LINES_TO_UNZIP) {
+                addHistory(historyContent, 0);
+            } else {
+                addHistory(historyContent, contentLinesCounter - LINES_TO_UNZIP);
+            }
+        } catch (IOException exception) {
+            showError(exception);
+        }
+    }
+
+    private void addHistory(List<String> content, int start) {
+        for (int i = start; i < content.size(); i++) {
+            chatArea.appendText(content.get(i) + System.lineSeparator());
+        }
+    }
+
+    private void shrinkHistory() {
+        try {
+            List<String> currentHistoryContent = Files.readAllLines(pathToHistory, StandardCharsets.UTF_8);
+            List<String> shrunkenContent = currentHistoryContent.stream().skip(SHRINK_STEP).collect(Collectors.toList());
+            Files.delete(pathToHistory);
+            Files.write(pathToHistory, shrunkenContent, StandardCharsets.UTF_8);
+            contentLinesCounter = shrunkenContent.size();
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+        }
     }
 
     @Override
@@ -139,6 +196,9 @@ public class MainSceneController implements Initializable, MessageProcessor {
                 case AUTH_CONFIRM -> {
                     try {
                         username = dto.getBody();
+                        login = dto.getLogin();
+                        pathToHistory = Paths.get(String.format("chat_history_%s.txt", login));
+                        readHistory();
                         MainWindow.displayMainWindow(username);
                         LoginWindow.getLoginWindow().close();
                     } catch (IOException exception) {
