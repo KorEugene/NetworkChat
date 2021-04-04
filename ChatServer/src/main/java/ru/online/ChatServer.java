@@ -11,6 +11,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChatServer {
 
@@ -18,6 +20,7 @@ public class ChatServer {
 
     private List<ClientHandler> onlineClientsList;
     private AuthService authService;
+    private ExecutorService executorService;
 
     public ChatServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT_NUMBER)) {
@@ -26,6 +29,7 @@ public class ChatServer {
             authService = new SQLiteAuthService();
             authService.start();
             onlineClientsList = new LinkedList<>();
+            executorService = Executors.newCachedThreadPool();
             while (true) {
                 System.out.println("Waiting for connection...");
                 Socket socket = serverSocket.accept();
@@ -90,5 +94,9 @@ public class ChatServer {
 
     public AuthService getAuthService() {
         return authService;
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 }
