@@ -1,5 +1,7 @@
 package ru.online;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.online.auth.AuthService;
 import ru.online.auth.PrimitiveAuthService;
 import ru.online.auth.SQLiteAuthService;
@@ -16,6 +18,7 @@ import java.util.concurrent.Executors;
 
 public class ChatServer {
 
+    public static final Logger LOGGER = LogManager.getLogger(ChatServer.class);
     private static final int PORT_NUMBER = 65500;
 
     private List<ClientHandler> onlineClientsList;
@@ -24,20 +27,20 @@ public class ChatServer {
 
     public ChatServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT_NUMBER)) {
-            System.out.println("Server started");
+            LOGGER.info("Server started");
 //            authService = new PrimitiveAuthService();
             authService = new SQLiteAuthService();
             authService.start();
             onlineClientsList = new LinkedList<>();
             executorService = Executors.newCachedThreadPool();
             while (true) {
-                System.out.println("Waiting for connection...");
+                LOGGER.info("Waiting for connection...");
                 Socket socket = serverSocket.accept();
-                System.out.println("Client connected!");
+                LOGGER.info("Client connected!");
                 new ClientHandler(socket, this);
             }
         } catch (IOException exception) {
-            exception.printStackTrace();
+            LOGGER.error(exception);
         } finally {
             if (executorService != null) {
                 executorService.shutdown();
