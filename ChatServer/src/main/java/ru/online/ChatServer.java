@@ -38,6 +38,10 @@ public class ChatServer {
             }
         } catch (IOException exception) {
             exception.printStackTrace();
+        } finally {
+            if (executorService != null) {
+                executorService.shutdown();
+            }
         }
     }
 

@@ -121,7 +121,6 @@ public class ClientHandler {
             System.out.println("Client timed out!");
             closeHandler();
         }
-        executorService.shutdown();
     }
 
     public void closeHandler() {
