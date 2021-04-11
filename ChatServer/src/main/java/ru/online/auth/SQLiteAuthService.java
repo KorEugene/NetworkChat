@@ -1,10 +1,16 @@
 package ru.online.auth;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.online.ChatServer;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SQLiteAuthService implements AuthService {
+
+    public static final Logger LOGGER = LogManager.getLogger(SQLiteAuthService.class);
 
     private final String GET_USERNAME_BY_LOGIN_PASS_QUERY = "SELECT username FROM clients WHERE login = ? AND password = ?;";
     private final String UPDATE_USERNAME_QUERY = "UPDATE clients SET username = ? WHERE username = ?;";
@@ -27,18 +33,18 @@ public class SQLiteAuthService implements AuthService {
 
     @Override
     public void start() {
-        System.out.println("Connecting to DB.");
+        LOGGER.info("Connecting to DB.");
         connect();
         create();
         getClients();
-        System.out.println("Connected to DB. Auth started.");
+        LOGGER.info("Connected to DB. Auth started.");
     }
 
     @Override
     public void stop() {
-        System.out.println("Disconnecting from DB.");
+        LOGGER.info("Disconnecting from DB.");
         disconnect();
-        System.out.println("Disconnected from DB. Auth stopped.");
+        LOGGER.info("Disconnected from DB. Auth stopped.");
     }
 
     @Override
@@ -53,7 +59,7 @@ public class SQLiteAuthService implements AuthService {
                 username = rs.getString("username");
             }
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
         return username;
     }
@@ -66,7 +72,7 @@ public class SQLiteAuthService implements AuthService {
             ps.setString(2, currentUsername);
             ps.executeUpdate();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
     }
 
@@ -80,7 +86,7 @@ public class SQLiteAuthService implements AuthService {
                 return true;
             }
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
         return false;
     }
@@ -91,7 +97,7 @@ public class SQLiteAuthService implements AuthService {
                 clients.add(new Client(rs.getString("username"), rs.getString("login"), rs.getString("password")));
             }
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
     }
 
@@ -101,7 +107,7 @@ public class SQLiteAuthService implements AuthService {
             statement.executeUpdate(CREATE_CLIENTS_TABLE_QUERY);
             insertDefault();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
     }
 
@@ -115,13 +121,13 @@ public class SQLiteAuthService implements AuthService {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.fatal(exception);
         }
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:clients.db");
             statement = connection.createStatement();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.fatal(exception);
         }
     }
 
@@ -129,12 +135,12 @@ public class SQLiteAuthService implements AuthService {
         try {
             if (statement != null) statement.close();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
         try {
             if (connection != null) connection.close();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(exception);
         }
     }
 }

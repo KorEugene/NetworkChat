@@ -1,5 +1,8 @@
 package ru.online;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.online.auth.SQLiteAuthService;
 import ru.online.messages.MessageDTO;
 import ru.online.messages.MessageType;
 
@@ -10,6 +13,8 @@ import java.net.Socket;
 import java.util.concurrent.*;
 
 public class ClientHandler {
+
+    public static final Logger LOGGER = LogManager.getLogger(ClientHandler.class);
 
     private Socket socket;
     private DataOutputStream outputStream;
@@ -23,24 +28,24 @@ public class ClientHandler {
             this.socket = socket;
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
-            System.out.println("Client Handler created!");
+            LOGGER.info("Client Handler created!");
 
             chatServer.getExecutorService().execute(() -> {
-                System.out.println("Client connection execute in: " + Thread.currentThread().getName());
+                LOGGER.info("Client connection execute in: " + Thread.currentThread().getName());
                 authenticate();
                 readMessages();
             });
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            LOGGER.error(exception);
         }
     }
 
     public void sendMessage(MessageDTO dto) {
         try {
             outputStream.writeUTF(dto.convertToJson());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            LOGGER.error(exception);
         }
     }
 
@@ -63,20 +68,18 @@ public class ClientHandler {
                         if (chatServer.usernameIsExist(newUsername)) {
                             response.setMessageType(MessageType.ERROR_MESSAGE);
                             response.setBody("Username is busy!");
-                            System.out.println(newUsername + " username is busy");
+                            LOGGER.warn(newUsername + " username is busy");
                         } else {
                             chatServer.updateUsername(currentUserName, newUsername);
                             response.setMessageType(MessageType.SETTINGS_USERNAME_CONFIRM);
-                            System.out.println("Username: " + currentUserName + " was changed: " + newUsername);
+                            LOGGER.info("Username: " + currentUserName + " was changed: " + newUsername);
                         }
                         sendMessage(response);
                     }
                 }
             }
-        } catch (IOException e) {
-//            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Thread.currentThread().interrupt();
+        } catch (IOException exception) {
+            LOGGER.error(exception);
         } finally {
             closeHandler();
         }
@@ -84,23 +87,23 @@ public class ClientHandler {
 
     private void authenticate() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        System.out.println("Authenticate started!");
+        LOGGER.info("Authenticate started!");
         Future<Boolean> task = executorService.submit(() -> {
             while (true) {
                 String authMessage = inputStream.readUTF();
-                System.out.println("received msg ");
+                LOGGER.info("received msg ");
                 MessageDTO dto = MessageDTO.convertFromJson(authMessage);
                 String username = chatServer.getAuthService().getUsernameByLoginPass(dto.getLogin(), dto.getPassword());
                 MessageDTO response = new MessageDTO();
                 if (username == null) {
                     response.setMessageType(MessageType.ERROR_MESSAGE);
                     response.setBody("Wrong login or pass!");
-                    System.out.println("Wrong auth");
+                    LOGGER.warn("Wrong auth");
                     sendMessage(response);
                 } else if (chatServer.isUserBusy(username)) {
                     response.setMessageType(MessageType.ERROR_MESSAGE);
                     response.setBody("You are clone!!!");
-                    System.out.println("Clone");
+                    LOGGER.warn("Clone");
                     sendMessage(response);
                 } else {
                     response.setMessageType(MessageType.AUTH_CONFIRM);
@@ -108,7 +111,7 @@ public class ClientHandler {
                     response.setLogin(dto.getLogin());
                     currentUserName = username;
                     chatServer.subscribe(this);
-                    System.out.println("Subscribed");
+                    LOGGER.info("Client subscribed");
                     sendMessage(response);
                     return true;
                 }
@@ -116,9 +119,8 @@ public class ClientHandler {
         });
         try {
             task.get(120, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-//            e.printStackTrace();
-            System.out.println("Client timed out!");
+        } catch (InterruptedException | ExecutionException | TimeoutException exception) {
+            LOGGER.warn("Client timed out!");
             closeHandler();
         }
     }
@@ -127,8 +129,8 @@ public class ClientHandler {
         try {
             chatServer.unsubscribe(this);
             socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            LOGGER.error(exception);
         }
     }
 
